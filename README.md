@@ -1,140 +1,69 @@
 # BunLauncher
 
-**BunLauncher** — десктопный лаунчер Minecraft с поддержкой NeoForge и модпаков. Написан на Python, использует PySide6 (Qt6) для интерфейса. Работает оффлайн после первоначальной установки.
+**BunLauncher** is a desktop Minecraft launcher featuring offline bundle installation, NeoForge support, and custom modpack synchronization. It is written in Python and uses PySide6 (Qt6) for its user interface.
 
-> **Важно:** BunLauncher не связан с Mojang Studios или Microsoft. Minecraft® — зарегистрированная торговая марка Mojang Synergies AB.
+> **Disclaimer:** BunLauncher is not affiliated with Mojang Studios or Microsoft. Minecraft® is a registered trademark of Mojang Synergies AB.
 
-## Возможности
+---
 
-- Графический интерфейс на Qt6 с анимациями и настройками
-- Оффлайн-установка: Minecraft, Java, NeoForge и модпак из одного bundle
-- Автоматический поиск и установка Java (Temurin)
-- Проверка целостности файлов (SHA256)
-- Настройки памяти, разрешения, JVM-аргументов, путей
-- Сборка в standalone `.exe` и Windows-инсталлятор
+## Features
 
-## Требования
+* **Qt6 User Interface:** Animated and customizable graphical interface.
+* **Offline Deployment:** Install Minecraft, Java, NeoForge, and modpacks entirely offline using a pre-packaged bundle.
+* **Automatic JRE Installer:** Detects, downloads, and installs Eclipse Temurin Java Runtime Environments (JRE).
+* **Integrity Validation:** Verifies client assets using SHA-256 hashes.
+* **Launcher Configurations:** Set custom RAM allocations, resolution sizes, JVM arguments, and directories.
+* **Compilation Pipeline:** Script-based standalone `.exe` build and Inno Setup installer generator.
 
-| Компонент | Версия |
-|-----------|--------|
-| Python | 3.10+ |
-| ОС | Windows 10+, Linux, macOS |
+---
 
-### Python-зависимости
+## Requirements
 
-```
-requests
-psutil
-Pillow
-PySide6
-```
+* **Python:** 3.10+
+* **OS:** Windows 10+ (preferred), Linux, or macOS.
+* **Dependencies:** `requests`, `psutil`, `Pillow`, `PySide6`.
 
-## Быстрый старт
+---
 
-### Запуск из исходников
+## Quick Start
 
-```bash
-git clone https://github.com/milkycloud-dev/buns-launcher-minecraft.git
-cd buns-launcher-minecraft
-pip install -r requirements.txt
-python run.py
-```
+### Running from Source
 
-При первом запуске откроется мастер установки. Файлы игры по умолчанию сохраняются в:
+1. Clone the repository and navigate inside:
+   ```bash
+   git clone https://github.com/milkycloud-dev/buns-launcher-minecraft.git
+   cd buns-launcher-minecraft
+   ```
 
-- **Windows:** `%APPDATA%\BunLauncher`
-- **Linux:** `~/BunLauncher`
-- **macOS:** `~/BunLauncher`
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### Готовый инсталлятор (Windows)
+3. Run the application:
+   ```bash
+   python run.py
+   ```
 
-Соберите или скачайте `BunLauncher_Setup.exe` из релизов. Подробности сборки — в [docs/BUILD.md](docs/BUILD.md).
+---
 
-## Структура проекта
+## Build Instructions
 
-```
-buns-launcher-minecraft/
-├── run.py                 # Точка входа: GUI + оффлайн-установка + запуск игры
-├── manifest.json          # Версии Minecraft, NeoForge, Java и URL-ы для bundle
-├── requirements.txt       # Python-зависимости
-├── assets/                # Логотип и фоновые изображения
-├── backend/               # Модульный backend для онлайн-установки
-│   ├── config.py          # Конфигурация launcher_config.json
-│   ├── downloader.py      # Загрузка файлов с прогрессом
-│   ├── java.py            # Поиск и установка Java
-│   ├── launcher.py        # Оркестратор install_and_play / launch_game
-│   ├── manifest.py        # Получение удалённого манифеста
-│   ├── minecraft.py       # Vanilla Minecraft + NeoForge
-│   └── security.py        # Проверка SHA256
-├── build_bundle.py        # Сборка оффлайн-bundle (нужен интернет)
-├── build_all.py           # Полный pipeline: bundle → exe → installer
-├── BunLauncher.spec       # Конфигурация PyInstaller
-├── installer.iss          # Скрипт Inno Setup
-└── docs/                  # Подробная документация
-```
+1. **Build Offline Bundle:**
+   Downloads all required assets (Minecraft files, NeoForge, mods) into the local bundle cache (requires internet connection):
+   ```bash
+   python build_bundle.py
+   ```
 
-## Конфигурация
+2. **Generate Standalone Executable & Installer (Windows):**
+   Uses PyInstaller and Inno Setup to package the application:
+   ```bash
+   python build_all.py
+   ```
+   *For detailed compilation guides, refer to [docs/BUILD.md](docs/BUILD.md).*
 
-Настройки хранятся в `{game_dir}/launcher_config.json`. Полный список параметров — в [docs/CONFIG.md](docs/CONFIG.md).
+---
 
-Основные параметры:
+## License
 
-| Параметр | По умолчанию | Описание |
-|----------|--------------|----------|
-| `username` | `Player` | Никнейм (3–16 символов, `a-z`, `0-9`, `_`) |
-| `memory_mb` | `4096` | Объём RAM для JVM |
-| `width` / `height` | `854` / `480` | Разрешение окна |
-| `fullscreen` | `false` | Полноэкранный режим |
-| `game_dir` | *(пусто)* | Папка игры (пусто = `%APPDATA%\BunLauncher`) |
-| `java_path` | *(пусто)* | Путь к `java` (пусто = автоопределение) |
-| `jvm_args` | *(пусто)* | Дополнительные JVM-аргументы |
-
-## Сборка
-
-Кратко:
-
-```bash
-# 1. Собрать оффлайн-bundle (нужен интернет, ~30 мин)
-python build_bundle.py
-
-# 2. Собрать exe + инсталлятор (Windows)
-python build_all.py
-```
-
-Подробная инструкция: [docs/BUILD.md](docs/BUILD.md).
-
-## Архитектура
-
-Проект состоит из двух слоёв:
-
-1. **`run.py`** — монолитное GUI-приложение с встроенной логикой оффлайн-установки и запуска
-2. **`backend/`** — переиспользуемая библиотека для онлайн-установки (скачивание с Mojang CDN, NeoForge Maven и т.д.)
-
-Подробнее: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-
-## Участие в разработке
-
-См. [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Лицензия
-
-Проект распространяется под лицензией [GNU General Public License v3.0](LICENSE).
-
-```
-Copyright (C) 2025-2026 Milkycloud Dev
-```
-
-### Сторонние компоненты
-
-- **Minecraft** — собственность Mojang Studios / Microsoft. Для игры требуется лицензия.
-- **NeoForge** — LGPL-2.1
-- **Eclipse Temurin (OpenJDK)** — GPL-2.0 with Classpath Exception
-- **PySide6 / Qt6** — LGPL-3.0
-
-Контент модпака может распространяться на отдельных условиях — уточняйте у авторов модпака.
-
-## Ссылки
-
-- [Репозиторий](https://github.com/milkycloud-dev/buns-launcher-minecraft)
-- [NeoForge](https://neoforged.net/)
-- [Eclipse Temurin](https://adoptium.net/)
+This project is licensed under the **GNU General Public License v3.0**.
